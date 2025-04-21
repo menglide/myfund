@@ -5,9 +5,11 @@ import { calcFixedPriceNumber, formatNumber, formatLabelString, sortData } from 
 
 export default async function handler(req, res) {
   // 允许所有源访问
-  res.header('Access-Control-Allow-Origin', '*'); 
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Origin', '*'); // 允许所有域访问
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS'); // 允许的请求方法
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // 允许的请求头
+  
+  //具体实现功能
   let aStockCount = 0;
   let usStockCount = 0;
   let hfStockCount = 0;
