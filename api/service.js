@@ -1,18 +1,13 @@
 // server.js
-import express from 'express'
 import axios from 'axios'
 import pkg from 'iconv-lite';
 import { calcFixedPriceNumber, formatNumber, formatLabelString, sortData } from '../utils.js';
 
-const app = express();
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // 允许所有源访问
+export default async function handler(req, res) {
+  // 允许所有源访问
+  res.header('Access-Control-Allow-Origin', '*'); 
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
-
-app.get('/', async (req, res) => {
   let aStockCount = 0;
   let usStockCount = 0;
   let hfStockCount = 0;
@@ -247,8 +242,6 @@ app.get('/', async (req, res) => {
   } catch (err) {
     res.status(500).send('代理请求失败: ' + err.message);
   }
-});
-
-export default app;
+};
 
 
