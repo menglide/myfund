@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>代理请求</title>
+</head>
+
+<body>
+  <div id="stock-info"></div>
+
+  <script>
+    function formatLabelString(str, params) {
+      try {
+        str = str.replace(/\$\{(.*?)\}/gi, function (_, $1) {
+          const formatMatch = /(.*?)\s*\|\s*padRight\s*(\|\s*(\d+))?/gi.exec($1);
+
+          if (formatMatch) {
+            return formatTreeText(
+              params[formatMatch[1]],
+              formatMatch[3] ? parseInt(formatMatch[3]) : undefined
+            );
+          } else {
+            return String(params[$1]);
+          }
+        });
+      } catch (err) {
+        // @ts-ignore
+        window.showErrorMessage(`fail: Label format Error, ${str};\n${err.message}`);
+        return '模板格式错误！';
+      }
+      return str;
+    }
+    const statusBarItemLabelFormat = "「${name}」${price}  ${icon}（${percent}）";
+    fetch('http://localhost:3000/stock?code=sz000065,sh000001,hf_OIL')
+      .then(res => res.json())
+      .then(resp => {
+        let stockArr = [];
+        for (let i = 0; i < resp.length; i++) {
+          const item = resp[i];
+          const stockBarItem = {}
+          
+
+
+          const { code, percent, open, yestclose, high, low, updown, amount } = item;
+          const deLow = percent.indexOf('-') === -1;
+          /* stockBarItem.text = `「${this.stockService.showLabel ? item.info.name : item.id}」${price}  ${
+            deLow ? '📈' : '📉'
+          }（${percent}%）`; */
+          stockBarItem.text = formatLabelString(statusBarItemLabelFormat, {
+            ...item,
+            percent: `${percent}%`,
+            icon: deLow ? '📈' : '📉',
+          });
+
+          stockBarItem.tooltip = `「今日行情」 ${
+            item?.name ?? '今日行情'
+          }（${code}）\n涨跌：${updown}   百分：${percent}%\n最高：${high}   最低：${low}\n今开：${open}   昨收：${yestclose}\n成交额：${amount}\n更新时间：${
+            item?.time
+          }`;
+          stockBarItem.color = deLow ? '#FF0000' : '#00FF00';
+          stockArr.push(stockBarItem);
+        }
+        console.log(stockArr);
+        // document.getElementById('stock-info').innerHTML = JSON.stringify(stockArr);
+      });
+  </script>
+</body>
+
+</html>
