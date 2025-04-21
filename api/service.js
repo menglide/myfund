@@ -2,7 +2,7 @@
 import express from 'express'
 import axios from 'axios'
 import pkg from 'iconv-lite';
-import { calcFixedPriceNumber, formatNumber, formatLabelString, sortData } from './utils.js';
+import { calcFixedPriceNumber, formatNumber, formatLabelString, sortData } from '../utils.js';
 
 const app = express();
 app.use((req, res, next) => {
