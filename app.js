@@ -15,7 +15,6 @@ app.use((req, res, next) => {
 app.get('/stock', async (req, res) => {
   let aStockCount = 0;
   let usStockCount = 0;
-  let cnfStockCount = 0;
   let hfStockCount = 0;
   let noDataStockCount = 0;
   let stockList = [];
