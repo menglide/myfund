@@ -32,7 +32,7 @@
       return str;
     }
     const statusBarItemLabelFormat = "「${name}」${price}  ${icon}（${percent}）";
-    fetch('http://localhost:3000/stock?code=sz000065,sh000001,hf_OIL')
+    fetch('https://myfund.vercel.app/api/service?code=sz000065,sh000001,hf_OIL')
       .then(res => res.json())
       .then(resp => {
         let stockArr = [];

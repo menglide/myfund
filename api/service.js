@@ -12,7 +12,7 @@ app.use((req, res, next) => {
   next();
 });
 
-export default async function handler(req, res) {
+app.get('/', async (req, res) => {
   let aStockCount = 0;
   let usStockCount = 0;
   let hfStockCount = 0;
@@ -247,6 +247,8 @@ export default async function handler(req, res) {
   } catch (err) {
     res.status(500).send('代理请求失败: ' + err.message);
   }
-};
+});
+
+export default app;
 
 
