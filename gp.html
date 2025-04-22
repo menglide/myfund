@@ -40,10 +40,13 @@
 
 <body>
   <div id="app">
-    <el-table v-loading="loading" :data="tableData" style="width: 100%;" :default-sort="{prop: 'updown', order: 'descending'}">
+    <el-table v-loading="loading" :data="tableData" style="width: 100%;"
+      :default-sort="{prop: 'updown', order: 'descending'}">
       <el-table-column label="名称" prop="name" min-width="40%">
         <template slot-scope="scope">
-          {{ scope.row.name + '('+scope.row.code +')' }}
+          <span :style='{color:["hf_OIL","hf_CHA50CFD"].includes(scope.row.code)?"#FF0000":""}'>
+            {{ scope.row.name + '('+scope.row.code +')' }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="百分" prop="percent" min-width="20%">
@@ -64,7 +67,7 @@
             <el-row>
               <el-col :span="24">更新时间: {{ scope.row.time }}</el-col>
             </el-row>
-            
+
             <div slot="reference" class="name-wrapper">
               <el-tag v-if="scope.row.updown > 0 " type="danger" effect="dark">
                 {{ scope.row.percent }}%
@@ -77,7 +80,7 @@
               </el-tag>
             </div>
           </el-popover>
-          
+
         </template>
       </el-table-column>
       <el-table-column label="涨跌" prop="updown" min-width="20%" sortable></el-table-column>
