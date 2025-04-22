@@ -3,58 +3,65 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>验证VUE和element-ui</title>
+    <title>fund</title>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
     <style>
         table {
-  font-size: 18px; /* 默认字体大小 */
-}
- 
-/* 媒体查询调整字体大小 */
-@media (max-width: 768px) {
-  table {
-    font-size: 18px; /* 小屏幕字体大小 */
-  }
-}
- 
-@media (min-width: 769px) and (max-width: 1024px) {
-  table {
-    font-size: 22px; /* 中等屏幕字体大小 */
-  }
-}
- 
-@media (min-width: 1025px) {
-  table {
-    font-size: 24px; /* 大屏幕字体大小 */
-  }
-}
+            font-size: 18px;
+            /* 默认字体大小 */
+        }
+
+        /* 媒体查询调整字体大小 */
+        @media (max-width: 768px) {
+            table {
+                font-size: 18px;
+                /* 小屏幕字体大小 */
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            table {
+                font-size: 22px;
+                /* 中等屏幕字体大小 */
+            }
+        }
+
+        @media (min-width: 1025px) {
+            table {
+                font-size: 24px;
+                /* 大屏幕字体大小 */
+            }
+        }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <el-table :data="tableData" style="width: 100%;"  :default-sort = "{prop: 'gszzl', order: 'descending'}">
-            <el-table-column label="名称" prop="name"  min-width="35%"></el-table-column>
-            <el-table-column label="编码" prop="fundcode" min-width="15%"></el-table-column>
+        <el-table :data="tableData" style="width: 100%;" :default-sort="{prop: 'gszzl', order: 'descending'}">
+            <el-table-column label="名称" prop="name" min-width="45%">
+                <template slot-scope="scope">
+                    {{ scope.row.name + '('+scope.row.fundcode +')' }}
+                </template>
+            </el-table-column>
             <el-table-column label="估值" prop="gszzl" min-width="15%" sortable>
                 <template slot-scope="scope">
                     <el-tag v-if="scope.row.gszzl > 0 " type="danger" effect="dark">
-                        {{ scope.row.gszzl }}
+                        {{ scope.row.gszzl }}%
                     </el-tag>
                     <el-tag v-else-if="scope.row.gszzl < 0 " type="success" effect="dark">
-                        {{ scope.row.gszzl }}
+                        {{ scope.row.gszzl }}%
                     </el-tag>
                     <el-tag v-else effect="dark">
-                        {{ scope.row.gszzl }}
+                        {{ scope.row.gszzl }}%
                     </el-tag>
                 </template>
             </el-table-column>
-            <el-table-column  label="估算净值" prop="gsz" min-width="15%" sortable></el-table-column>
+            <el-table-column label="估算净值" prop="gsz" min-width="15%" sortable></el-table-column>
             <!-- <el-table-column label="最新净值" prop="dwjz" ></el-table-column> -->
-            <el-table-column  label="时间"prop="gztime"  min-width="20%"></el-table-column>
+            <el-table-column label="时间" prop="gztime" min-width="25%"></el-table-column>
         </el-table>
     </div>
     <script>
@@ -124,7 +131,7 @@
                 async getFundInfo() {
                     for (let i = 0; i < this.fundArr.length; i++) {
                         const codeStr = this.fundArr[i];
-                        const data = await this.qryFundInfo(i,codeStr);
+                        const data = await this.qryFundInfo(i, codeStr);
                         this.tableData.push(data);
                     }
                 },
@@ -140,10 +147,10 @@
                             jsonpCallback: "jsonpgz",
                             success: (data) => {
                                 if (data) {
-                                    resolve({...data,...{index:index}});
+                                    resolve({ ...data, ...{ index: index } });
                                 } else {
                                     resolve({
-                                        index:index,
+                                        index: index,
                                         name: '未知',
                                         fundcode: codeStr,
                                         gszzl: 0,
@@ -154,7 +161,7 @@
                             },
                             error: (err) => {
                                 resolve({
-                                    index:index,
+                                    index: index,
                                     name: '未知',
                                     fundcode: codeStr,
                                     gszzl: 0,

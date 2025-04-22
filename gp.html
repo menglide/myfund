@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>stock</title>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
+  <style>
+    table {
+      font-size: 18px;
+      /* 默认字体大小 */
+    }
+
+    /* 媒体查询调整字体大小 */
+    @media (max-width: 768px) {
+      table {
+        font-size: 18px;
+        /* 小屏幕字体大小 */
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      table {
+        font-size: 22px;
+        /* 中等屏幕字体大小 */
+      }
+    }
+
+    @media (min-width: 1025px) {
+      table {
+        font-size: 24px;
+        /* 大屏幕字体大小 */
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <el-table :data="tableData" style="width: 100%;" :default-sort="{prop: 'updown', order: 'descending'}">
+      <el-table-column label="名称" prop="name" min-width="45%">
+        <template slot-scope="scope">
+          {{ scope.row.name + '('+scope.row.code +')' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="百分" prop="percent" min-width="15%">
+        <template slot-scope="scope">
+          <el-popover trigger="hover" placement="top" width="200">
+            <el-row>
+              <el-col :span="12">今开: {{ scope.row.open }}</el-col>
+              <el-col :span="12">昨收: {{ scope.row.yestclose }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">最高: {{ scope.row.high }}</el-col>
+              <el-col :span="12">最低: {{ scope.row.low }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">成交量: {{ scope.row.volume }}</el-col>
+              <el-col :span="12">成交额: {{ scope.row.amount }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">更新时间: {{ scope.row.time }}</el-col>
+            </el-row>
+            
+            <div slot="reference" class="name-wrapper">
+              <el-tag v-if="scope.row.updown > 0 " type="danger" effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+              <el-tag v-else-if="scope.row.updown < 0 " type="success" effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+              <el-tag v-else effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+            </div>
+          </el-popover>
+          
+        </template>
+      </el-table-column>
+      <el-table-column label="涨跌" prop="updown" min-width="15%" sortable></el-table-column>
+      <el-table-column label="价格" prop="price" min-width="25%"></el-table-column>
+    </el-table>
+  </div>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        fundArr: [
+          "sh000001",
+          "sh000300",
+          "sh000016",
+          "sh000688",
+          "usr_ixic",
+          "usr_dji",
+          "usr_inx",
+          "nf_IF0",
+          "nf_IH0",
+          "nf_IC0",
+          "nf_IM0",
+          "hf_OIL",
+          "hf_CHA50CFD",
+          "sh513130",
+          "sh513300",
+          "sh513730",
+          "sh513310",
+          "sh513350",
+          "sh513520",
+          "sz159329",
+          "sh513030",
+          "sh513080",
+          "sz000065",
+        ],
+        tableData: []
+      },
+      mounted() {
+        this.getStockInfo();
+      },
+      methods: {
+        getStockInfo() {
+          fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
+            .then(res => res.json())
+            .then(resp => {
+              this.tableData = resp
+            })
+        },
+      }
+    })
+  </script>
+</body>
+
+</html>
