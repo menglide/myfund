@@ -40,7 +40,7 @@
 
 <body>
   <div id="app">
-    <el-table :data="tableData" style="width: 100%;" :default-sort="{prop: 'updown', order: 'descending'}">
+    <el-table v-loading="loading" :data="tableData" style="width: 100%;" :default-sort="{prop: 'updown', order: 'descending'}">
       <el-table-column label="名称" prop="name" min-width="40%">
         <template slot-scope="scope">
           {{ scope.row.name + '('+scope.row.code +')' }}
@@ -88,6 +88,7 @@
     var app = new Vue({
       el: '#app',
       data: {
+        loading: false,
         fundArr: [
           "sh000001",
           "sh000300",
@@ -120,10 +121,12 @@
       },
       methods: {
         getStockInfo() {
+          this.loading = true;
           fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
             .then(res => res.json())
             .then(resp => {
               this.tableData = resp
+              this.loading = false
             })
         },
       }
