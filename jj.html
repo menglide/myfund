@@ -9,10 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
     <style>
-        table,.el-tag {
+        table,
+        .el-tag {
             font-size: 1.4rem;
             /* 默认字体大小 */
-        }       
+        }
     </style>
 </head>
 
@@ -24,7 +25,7 @@
                     <span :style='{color:["003096","009645"].includes(scope.row.fundcode)?"#FF0000":""}'>
                         {{ scope.row.name.slice(0, 15) + '('+scope.row.fundcode +')' }}
                     </span>
-                  </template>
+                </template>
             </el-table-column>
             <el-table-column label="估值" prop="gszzl" min-width="15%" sortable :sort-method="sortByNumber">
                 <template slot-scope="scope">
@@ -120,18 +121,30 @@
                 },
                 qryFundInfo(index, codeStr) {
                     return new Promise((resolve, reject) => {
-                        const url = `https://fundgz.1234567.com.cn/js/${codeStr}.js`;
-                        $.ajax({
-                            url: url,
-                            type: 'GET', //数据提交
-                            contentType: 'jsonp', // 传参格式（默认为表单） json为application/json
-                            dataType: 'jsonp', // 数据类型
-                            jsonp: 'callback', // 指定回调函数名，与服务器端接收的一致，并回传回来
-                            jsonpCallback: "jsonpgz",
-                            success: (data) => {
-                                if (data) {
-                                    resolve({ ...data, ...{ index: index } });
-                                } else {
+                        setTimeout(() => {
+                            const url = `https://fundgz.1234567.com.cn/js/${codeStr}.js`;
+                            $.ajax({
+                                url: url,
+                                type: 'GET', //数据提交
+                                contentType: 'jsonp', // 传参格式（默认为表单） json为application/json
+                                dataType: 'jsonp', // 数据类型
+                                jsonp: 'callback', // 指定回调函数名，与服务器端接收的一致，并回传回来
+                                jsonpCallback: "jsonpgz",
+                                success: (data) => {
+                                    if (data) {
+                                        resolve({ ...data, ...{ index: index } });
+                                    } else {
+                                        resolve({
+                                            index: index,
+                                            name: '未知',
+                                            fundcode: codeStr,
+                                            gszzl: 0,
+                                            gztime: '',
+                                        });
+                                    }
+
+                                },
+                                error: (err) => {
                                     resolve({
                                         index: index,
                                         name: '未知',
@@ -140,18 +153,8 @@
                                         gztime: '',
                                     });
                                 }
-
-                            },
-                            error: (err) => {
-                                resolve({
-                                    index: index,
-                                    name: '未知',
-                                    fundcode: codeStr,
-                                    gszzl: 0,
-                                    gztime: '',
-                                });
-                            }
-                        })
+                            })
+                        }, 50);
                     });
                 }
             }
