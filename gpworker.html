@@ -115,8 +115,8 @@
                 },
         getStockInfo() {
           this.loading = true;
-          // fetch('https://sinajs.menlyd.workers.dev?code=' + this.fundArr.join())
-          fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
+          fetch('https://sinajs.menlyd.workers.dev?code=' + this.fundArr.join())
+          // fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
             .then(res => res.json())
             .then(resp => {
               this.tableData = resp

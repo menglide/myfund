@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+		<title>基金</title>
+		<style>
+			body {
+				font-size: 1.1em;
+				overflow-x: hidden;
+			}
+
+			span {
+				width: -webkit-fill-available;
+				display: inline-block;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			label {
+				width: 80px;
+				display: inline-block;
+			}
+
+			p {
+				height: 20px;
+				border-bottom: 1px dashed #999;
+				padding: 1.5rem 0;
+				margin: 0;
+			}
+
+			.btn {
+				display: flex;
+				justify-content: space-evenly;
+			}
+
+			.btn>div {
+				margin: 0 5px;
+				border: 1px solid #ccc;
+				padding: 5px 20px;
+				width: 50%;
+				text-align: center;
+				cursor: pointer;
+				background-color: #d3e3fd;
+			}
+		</style>
+	</head>
+	<body onload="qryFundInfo()">
+		<div class="btn">
+			<div onclick="orderBy()">排序</div>
+		</div>
+		<div id="panel"></div>
+	</body>
+	<script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		const fundArr = [
+			"012349",
+			"002667", 
+			"011103", 
+			"009068", 
+			"011854", 
+			"009180", 
+			"008280", 
+			"004857", 
+			"003299", 
+			"003985", 
+			"005940", 
+			"008190", 
+			"007690", 
+			"005224", 
+			"004753", 
+			"011513", 
+			"011041", 
+			"010770", 
+			"002974", 
+			"005693", 
+			"002984", 
+			"004070", 
+			"007301", 
+			"008087", 
+			"004433", 
+			"002979", 
+			"001632", 
+			"001618", 
+			"001553", 
+			"001630", 
+			"001551", 
+			"001595", 
+			"003096", 
+			"006753", 
+			"008282", 
+			"004855", 
+			"501012", 
+			"009063", 
+			"004522", 
+			"011036", 
+			"008682", 
+			"009645", 
+			"000217", 
+			"012414", 
+			"012769", 
+			"012755", 
+			"005064", 
+			"013478", 
+			"012725", 
+			"159713", 
+			"010524",  
+			"014130"
+		];
+		let fundList = [];
+		let mySort = true;
+
+		function qryFundInfo() {
+			const url = `https://fundgz.1234567.com.cn/js/${fundArr[0]}.js`;
+			$.ajax({
+				url: url,
+				type: 'GET', //数据提交
+				contentType: 'jsonp', // 传参格式（默认为表单） json为application/json
+				dataType: 'jsonp', // 数据类型
+				jsonp: 'callback', // 指定回调函数名，与服务器端接收的一致，并回传回来
+				jsonpCallback: "jsonpgz",
+				success: (data) => {
+					if (data) {
+						fundList.push(data);
+						$('#panel').append('<p><span>' + fundArr.length + " |（" + data.fundcode + '）' + data
+							.name +
+							'</span>' +
+							(data.gszzl > 0 ? '<label style="color:red;">' + data.gszzl + '</label>' :
+								'<label style="color:green;">' + data.gszzl + '</label>') + data.gztime +
+							'</p>')
+						fundArr.splice(0, 1);
+						if (fundArr.length > 0) {
+							qryFundInfo()
+						}
+					} else {
+						fundList.push({
+							name: '未知',
+							fundcode: fundArr[0],
+							gszzl: 0,
+							gztime: '',
+						});
+						$('#panel').append(fundArr[0] + '<br>')
+						fundArr.splice(0, 1);
+						if (fundArr.length > 0) {
+							qryFundInfo()
+						}
+					}
+					if (fundArr.length == 0) {
+						fundList.sort(sortGszzl);
+						$('#panel').html('');
+						fundList.forEach((data, index) => {
+							$('#panel').append('<p style="background-color: '+(index%2===0?'#F5F7FA;':'#FFFFFF') +'"><span>' + index + " |（" + data.fundcode +
+								'）' + data.name +
+								'</span>' +
+								(data.gszzl > 0 ? '<label style="color:red;">' + data.gszzl +
+									'</label>' :
+									'<label style="color:green;">' + data.gszzl + '</label>') + data
+								.gztime + '</p>')
+						})
+					}
+				},
+				error: (err) => {
+					fundList.push({
+						name: '未知',
+						fundcode: fundArr[0],
+						gszzl: 0,
+						gztime: '',
+					});
+					$('#panel').append(fundArr[0] + '<br>')
+					fundArr.splice(0, 1);
+					if (fundArr.length > 0) {
+						qryFundInfo()
+					}
+				}
+			})
+		}
+
+		function orderBy() {
+			mySort = !mySort;
+			fundList.sort(sortGszzl);
+			$('#panel').html('');
+			fundList.forEach((data, index) => {
+				$('#panel').append('<p><span>' + index + " |（" + data.fundcode +
+					'）' + data.name +
+					'</span>' +
+					(data.gszzl > 0 ? '<label style="color:red;">' + data.gszzl +
+						'</label>' :
+						'<label style="color:green;">' + data.gszzl + '</label>') + data
+					.gztime + '</p>')
+			})
+		}
+		//根据gszzl 从大到小排列
+		function sortGszzl(a, b) {
+			if (mySort) {
+				return b.gszzl - a.gszzl;
+			} else {
+				return a.gszzl - b.gszzl;
+			}
+		}
+	</script>
+</html>
