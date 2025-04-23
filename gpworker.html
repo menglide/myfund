@@ -9,25 +9,26 @@
   <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
   <style>
-    table,.el-tag,.el-popover {
-            font-size: 1.4rem;
-            /* 默认字体大小 */
-        }  
+    table,
+    .el-tag,
+    .el-popover,
+    .el-divider__text {
+      font-size: 1.4rem;
+      /* 默认字体大小 */
+    }
   </style>
 </head>
 
 <body>
   <div id="app">
-    <el-table v-loading="loading" :data="tableData" style="width: 100%;"
-      :default-sort="{prop: 'percent', order: 'descending'}">
+    <el-divider content-position="left">股指</el-divider>
+    <el-table :data="tableDatahf" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
       <el-table-column label="名称" prop="name" min-width="40%">
         <template slot-scope="scope">
-          <span :style='{color:["hf_OIL","hf_CHA50CFD"].includes(scope.row.code)?"#FF0000":""}'>
             {{ scope.row.name + '('+scope.row.code +')' }}
-          </span>
         </template>
       </el-table-column>
-      <el-table-column label="百分" prop="percent" min-width="20%"  sortable :sort-method="sortByNumber">
+      <el-table-column label="百分" prop="percent" min-width="20%" sortable :sort-method="sortByNumber">
         <template slot-scope="scope">
           <el-popover trigger="hover" placement="top" width="350">
             <el-row>
@@ -35,8 +36,9 @@
             </el-row>
             <el-row>
               <el-col :span="12">涨跌: {{ scope.row.updown }}</el-col>
-              <el-col :span="12">百分: 
-                <span :style='{color:scope.row.percent.substr(0,1) ==="+"?"#FF0000":"#00FF00"}'>{{ scope.row.percent }}%</span>
+              <el-col :span="12">百分:
+                <span :style='{color:scope.row.percent.substr(0,1) ==="+"?"#FF0000":"#00FF00"}'>{{ scope.row.percent
+                  }}%</span>
               </el-col>
             </el-row>
             <el-row>
@@ -73,6 +75,118 @@
       <el-table-column label="涨跌" prop="updown" min-width="20%"></el-table-column>
       <el-table-column label="价格" prop="price" min-width="20%"></el-table-column>
     </el-table>
+    <el-divider content-position="left">美股</el-divider>
+    <el-table :data="tableDatausr" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
+      <el-table-column label="名称" prop="name" min-width="40%">
+        <template slot-scope="scope">
+            {{ scope.row.name + '('+scope.row.code +')' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="百分" prop="percent" min-width="20%" sortable :sort-method="sortByNumber">
+        <template slot-scope="scope">
+          <el-popover trigger="hover" placement="top" width="350">
+            <el-row>
+              <el-col :span="24">{{ scope.row.name + '('+scope.row.code +')' }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">涨跌: {{ scope.row.updown }}</el-col>
+              <el-col :span="12">百分:
+                <span :style='{color:scope.row.percent.substr(0,1) ==="+"?"#FF0000":"#00FF00"}'>{{ scope.row.percent
+                  }}%</span>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">今开: {{ scope.row.open }}</el-col>
+              <el-col :span="12">昨收: {{ scope.row.yestclose }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">最高: {{ scope.row.high }}</el-col>
+              <el-col :span="12">最低: {{ scope.row.low }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">成交量: {{ scope.row.volume }}</el-col>
+              <el-col :span="12">成交额: {{ scope.row.amount }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">更新时间: {{ scope.row.time }}</el-col>
+            </el-row>
+
+            <div slot="reference" class="name-wrapper">
+              <el-tag v-if="scope.row.percent.substr(0,1) ==='+'" type="danger" effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+              <el-tag v-else-if="scope.row.percent.substr(0,1) ==='-'" type="success" effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+              <el-tag v-else effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+            </div>
+          </el-popover>
+
+        </template>
+      </el-table-column>
+      <el-table-column label="涨跌" prop="updown" min-width="20%"></el-table-column>
+      <el-table-column label="价格" prop="price" min-width="20%"></el-table-column>
+    </el-table>
+    
+    <el-divider content-position="left">国内</el-divider>
+    <el-table :data="tableDatash" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
+      <el-table-column label="名称" prop="name" min-width="40%">
+        <template slot-scope="scope">
+          <span :style='{color:["sh513130"].includes(scope.row.code)?"#FF0000":""}'>
+            {{ scope.row.name + '('+scope.row.code +')' }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="百分" prop="percent" min-width="20%" sortable :sort-method="sortByNumber">
+        <template slot-scope="scope">
+          <el-popover trigger="hover" placement="top" width="350">
+            <el-row>
+              <el-col :span="24">{{ scope.row.name + '('+scope.row.code +')' }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">涨跌: {{ scope.row.updown }}</el-col>
+              <el-col :span="12">百分:
+                <span :style='{color:scope.row.percent.substr(0,1) ==="+"?"#FF0000":"#00FF00"}'>{{ scope.row.percent
+                  }}%</span>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">今开: {{ scope.row.open }}</el-col>
+              <el-col :span="12">昨收: {{ scope.row.yestclose }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">最高: {{ scope.row.high }}</el-col>
+              <el-col :span="12">最低: {{ scope.row.low }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">成交量: {{ scope.row.volume }}</el-col>
+              <el-col :span="12">成交额: {{ scope.row.amount }}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">更新时间: {{ scope.row.time }}</el-col>
+            </el-row>
+
+            <div slot="reference" class="name-wrapper">
+              <el-tag v-if="scope.row.percent.substr(0,1) ==='+'" type="danger" effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+              <el-tag v-else-if="scope.row.percent.substr(0,1) ==='-'" type="success" effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+              <el-tag v-else effect="dark">
+                {{ scope.row.percent }}%
+              </el-tag>
+            </div>
+          </el-popover>
+
+        </template>
+      </el-table-column>
+      <el-table-column label="涨跌" prop="updown" min-width="20%"></el-table-column>
+      <el-table-column label="价格" prop="price" min-width="20%"></el-table-column>
+    </el-table>
+    
   </div>
   <script>
     var app = new Vue({
@@ -104,22 +218,32 @@
           "sh513080",
           "sz000065",
         ],
-        tableData: []
+        tableDatausr: [],
+        tableDatahf: [],
+        tableDatash: [],
       },
       mounted() {
         this.getStockInfo();
       },
       methods: {
         sortByNumber(a, b) {
-                    return parseFloat(a.percent) - parseFloat(b.percent);
-                },
+          return parseFloat(a.percent) - parseFloat(b.percent);
+        },
         getStockInfo() {
           this.loading = true;
           fetch('https://sinajs.menlyd.workers.dev?code=' + this.fundArr.join())
           // fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
             .then(res => res.json())
             .then(resp => {
-              this.tableData = resp
+              for (let i = 0; i < resp.length; i++) {
+                if (resp[i].code.includes('hf')) {
+                  this.tableDatahf.push(resp[i])
+                } else if (resp[i].code.includes('usr')) {
+                  this.tableDatausr.push(resp[i])
+                } else {
+                  this.tableDatash.push(resp[i])
+                }
+              }
               this.loading = false
             })
         },
