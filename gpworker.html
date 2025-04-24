@@ -23,9 +23,15 @@
   <div id="app">
     <el-divider content-position="left">股指</el-divider>
     <el-table :data="tableDatahf" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
+      <el-table-column type="expand">
+        <template slot-scope="scope">
+          <div style="min-width: 1320px; overflow-x:auto">
+            <iframe :src="getStockQhInfo(scope.row.code)" frameborder="0" style="width: 100%; height: 570px"></iframe>
+        </template>
+      </el-table-column>
       <el-table-column label="名称" prop="name" min-width="40%">
         <template slot-scope="scope">
-            {{ scope.row.name + '('+scope.row.code +')' }}
+          {{ scope.row.name + '('+scope.row.code +')' }}
         </template>
       </el-table-column>
       <el-table-column label="百分" prop="percent" min-width="20%" sortable :sort-method="sortByNumber">
@@ -76,10 +82,19 @@
       <el-table-column label="价格" prop="price" min-width="20%"></el-table-column>
     </el-table>
     <el-divider content-position="left">美股</el-divider>
-    <el-table :data="tableDatausr" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
+    <el-table :data="tableDatausr" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}"
+      @expand-change="handleExpandChange">
+      <el-table-column type="expand">
+        <template slot-scope="scope">
+          <image :src="itemStockInfo.timeK" style="width: 49%;" />
+          <image :src="itemStockInfo.dailyK" style="width: 49%;" />
+          <image :src="itemStockInfo.weeklyK" style="width: 49%;" />
+          <image :src="itemStockInfo.monthlyK" style="width: 49%;" />
+        </template>
+      </el-table-column>
       <el-table-column label="名称" prop="name" min-width="40%">
         <template slot-scope="scope">
-            {{ scope.row.name + '('+scope.row.code +')' }}
+          {{ scope.row.name + '('+scope.row.code +')' }}
         </template>
       </el-table-column>
       <el-table-column label="百分" prop="percent" min-width="20%" sortable :sort-method="sortByNumber">
@@ -129,9 +144,18 @@
       <el-table-column label="涨跌" prop="updown" min-width="20%"></el-table-column>
       <el-table-column label="价格" prop="price" min-width="20%"></el-table-column>
     </el-table>
-    
+
     <el-divider content-position="left">国内</el-divider>
-    <el-table :data="tableDatash" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
+    <el-table :data="tableDatash" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}"
+      @expand-change="handleExpandChange">
+      <el-table-column type="expand">
+        <template slot-scope="scope">
+          <image :src="itemStockInfo.timeK" style="width: 49%;" />
+          <image :src="itemStockInfo.dailyK" style="width: 49%;" />
+          <image :src="itemStockInfo.weeklyK" style="width: 49%;" />
+          <image :src="itemStockInfo.monthlyK" style="width: 49%;" />
+        </template>
+      </el-table-column>
       <el-table-column label="名称" prop="name" min-width="40%">
         <template slot-scope="scope">
           <span :style='{color:["sh513130"].includes(scope.row.code)?"#FF0000":""}'>
@@ -186,13 +210,19 @@
       <el-table-column label="涨跌" prop="updown" min-width="20%"></el-table-column>
       <el-table-column label="价格" prop="price" min-width="20%"></el-table-column>
     </el-table>
-    
+
   </div>
   <script>
     var app = new Vue({
       el: '#app',
       data: {
         loading: false,
+        itemStockInfo: {
+          timeK: '',
+          dailyK: '',
+          weeklyK: '',
+          monthlyK: '',
+        },
         fundArr: [
           "sh000001",
           "sh000300",
@@ -229,10 +259,19 @@
         sortByNumber(a, b) {
           return parseFloat(a.percent) - parseFloat(b.percent);
         },
+        getStockQhInfo(stockCode) {
+          stockCode = stockCode.replace('nf_', '').replace('hf_', '').toUpperCase();
+          return `https://finance.sina.com.cn/futures/quotes/${stockCode}.shtml`
+        },
         getStockInfo() {
-          this.loading = true;
+          this.loading = this.$loading({
+            lock: true,
+            text: 'Loading',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });;
           fetch('https://sinajs.menlyd.workers.dev?code=' + this.fundArr.join())
-          // fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
+            // fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
             .then(res => res.json())
             .then(resp => {
               for (let i = 0; i < resp.length; i++) {
@@ -244,9 +283,70 @@
                   this.tableDatash.push(resp[i])
                 }
               }
-              this.loading = false
+              this.loading.close();
             })
         },
+        handleExpandChange(row, expandedRows) {
+          console.log('当前展开行数据：', row, expandedRows);
+          if (expandedRows.length > 0) {
+            // 例如：触发后台请求获取详情
+            this.itemStockInfo = this.stockTrendPic(row.code, row.name, row.code);
+            console.log(this.itemStockInfo);
+          }
+
+        },
+        stockTrendPic(code, name, stockCode) {
+          const timestamp = new Date().getTime();
+          const codeByImgPath = {
+            normal: 'https://image.sinajs.cn/newchart',
+            usstock: 'https://image.sinajs.cn/newchart/v5/usstock',
+            hk_stock: 'http://image.sinajs.cn/newchart/hk_stock',
+            cn_future: 'http://image.sinajs.cn/newchart/v5/futures/china'
+          };
+          let sszsImg = code;
+          let imageName = stockCode.toLowerCase();
+          let timeK = `${codeByImgPath.normal}/min/n/${imageName}.gif`;
+          let dailyK = `${codeByImgPath.normal}/daily/n/${imageName}.gif`;
+          let weeklyK = `${codeByImgPath.normal}/weekly/n/${imageName}.gif`;
+          let monthlyK = `${codeByImgPath.normal}/monthly/n/${imageName}.gif`;
+          // console.log(dailyK);
+          if (stockCode.indexOf('hk') === 0) {
+            imageName = stockCode.replace('hk', '');
+            sszsImg = imageName;
+            timeK = `${codeByImgPath.hk_stock}/min/${sszsImg}.gif?${timestamp}`;
+            dailyK = `${codeByImgPath.hk_stock}/daily/${sszsImg}.gif?${timestamp}`;
+            weeklyK = `${codeByImgPath.hk_stock}/weekly/${sszsImg}.gif?${timestamp}`;
+            monthlyK = `${codeByImgPath.hk_stock}/monthly/${sszsImg}.gif?${timestamp}`;
+          } else if (stockCode.indexOf('gb_') === 0) {
+            imageName = stockCode.replace('gb_', '.');
+            sszsImg = imageName;
+            timeK = `${codeByImgPath.usstock}/min/${sszsImg}.gif?${timestamp}`;
+            dailyK = `${codeByImgPath.usstock}/daily/${sszsImg}.gif?${timestamp}`;
+            weeklyK = `${codeByImgPath.usstock}/weekly/${sszsImg}.gif?${timestamp}`;
+            monthlyK = `${codeByImgPath.usstock}/monthly/${sszsImg}.gif?${timestamp}`;
+          } else if (stockCode.indexOf('usr_') === 0) {
+            imageName = stockCode.replace('usr_', '');
+            sszsImg = imageName;
+            timeK = `${codeByImgPath.usstock}/min/${sszsImg}.gif?${timestamp}`;
+            dailyK = `${codeByImgPath.usstock}/daily/${sszsImg}.gif?${timestamp}`;
+            weeklyK = `${codeByImgPath.usstock}/weekly/${sszsImg}.gif?${timestamp}`;
+            monthlyK = `${codeByImgPath.usstock}/monthly/${sszsImg}.gif?${timestamp}`;
+          } else if (stockCode.indexOf('nf') === 0) {
+            // sina 数据源问题，无法规避。周线以上行情存在开盘价错乱问题
+            imageName = stockCode.replace('nf_', '');
+            sszsImg = imageName;
+            timeK = `${codeByImgPath.cn_future}/min/${sszsImg}.gif?${timestamp}`;
+            dailyK = `${codeByImgPath.cn_future}/daily/${sszsImg}.gif?${timestamp}`;
+            weeklyK = `${codeByImgPath.cn_future}/weekly/${sszsImg}.gif?${timestamp}`;
+            monthlyK = `${codeByImgPath.cn_future}/monthly/${sszsImg}.gif?${timestamp}`;
+          }
+          return {
+            timeK,
+            dailyK,
+            weeklyK,
+            monthlyK
+          }
+        }
       }
     })
   </script>

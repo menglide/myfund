@@ -20,6 +20,13 @@
 <body>
     <div id="app">
         <el-table :data="tableData" style="width: 100%;" :default-sort="{prop: 'gszzl', order: 'descending'}">
+            <el-table-column type="expand">
+                <template slot-scope="scope">
+                    <el-image 
+                    :src="'http://j4.dfcfw.com/charts/pic6/'+scope.row.fundcode+'.png?v='+new Date().getTime()">
+                  </el-image>
+                </template>
+              </el-table-column>
             <el-table-column label="名称" prop="name" min-width="45%">
                 <template slot-scope="scope">
                     <span :style='{color:["003096","009645"].includes(scope.row.fundcode)?"#FF0000":""}'>
