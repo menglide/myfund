@@ -16,6 +16,11 @@
       font-size: 1.4rem;
       /* 默认字体大小 */
     }
+
+    .el-loading-spinner .el-loading-text,
+    .el-loading-spinner i {
+      font-size: 5rem;
+    }
   </style>
 </head>
 
@@ -25,8 +30,9 @@
     <el-table :data="tableDatahf" style="width: 100%;" :default-sort="{prop: 'percent', order: 'descending'}">
       <el-table-column type="expand">
         <template slot-scope="scope">
-          <div style="min-width: 1320px; overflow-x:auto">
+          <div>
             <iframe :src="getStockQhInfo(scope.row.code)" frameborder="0" style="width: 100%; height: 570px"></iframe>
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="名称" prop="name" min-width="40%">
@@ -261,7 +267,11 @@
         },
         getStockQhInfo(stockCode) {
           stockCode = stockCode.replace('nf_', '').replace('hf_', '').toUpperCase();
-          return `https://finance.sina.com.cn/futures/quotes/${stockCode}.shtml`
+          if (/Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)) {
+            return `https://gu.sina.cn/ft/hq/hf.php?symbol=${stockCode}`
+          } else {
+            return `https://finance.sina.com.cn/futures/quotes/${stockCode}.shtml`
+          }
         },
         getStockInfo() {
           this.loading = this.$loading({
