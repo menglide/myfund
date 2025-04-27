@@ -281,7 +281,8 @@
             background: 'rgba(0, 0, 0, 0.7)'
           });;
           // fetch('https://sinajs.menlyd.workers.dev?code=' + this.fundArr.join())
-          fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
+          // fetch('https://myfund.vercel.app/api/service?code=' + this.fundArr.join())
+          fetch('https://www.menglide.cn/api/service?code=' + this.fundArr.join())
             .then(res => res.json())
             .then(resp => {
               for (let i = 0; i < resp.length; i++) {
