@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Cesium Demo</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
+		<!-- 在 <head> 中加入 Cesium -->
+		<link href="https://unpkg.com/cesium@1.94.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+		<script src="https://unpkg.com/cesium@1.94.0/Build/Cesium/Cesium.js"></script>
+	</head>
+
+	<body>
+		<div id="app">
+			<div id="cesiumContainer" style="width: 100%; height: 800px;"></div>
+		</div>
+		<script>
+			var app = new Vue({
+				el: '#app',
+				data: {
+					viewer: null,
+					iconList:[],
+				},
+				mounted() {
+					this.$nextTick(() => {
+
+						this.initMap()
+						const array = [
+							[113.88987140432921, 22.75884398726038],
+							[113.88989473843075, 22.758853752373867],
+							[113.8898767309737, 22.758837714386505],
+							[113.88989135130919, 22.758857118640957],
+							[113.88987786922432, 22.758838268587315],
+							[113.88989311020369, 22.758858621420845],
+							[113.88987960813668, 22.75883978600159],
+							[113.8898956652699, 22.75886018939414],
+							[113.8898815262415, 22.758841833281284],
+							[113.88989700328868, 22.758860599550363],
+							[113.88988327622762, 22.758841954595695],
+							[113.88991320403814, 22.75887261786238],
+							[113.88990044038435, 22.75885327327569],
+							[113.889942409076, 22.75889178036732],
+							[113.88992984188872, 22.758872307163116],
+							[113.89000148310458, 22.75892969399999],
+							[113.88998889431464, 22.758910234881807],
+							[113.8901220302743, 22.75900836890565],
+							[113.89010934139797, 22.758988974598612],
+							[113.89013257957915, 22.75901526638396]
+						]
+						for (let i = 0; i < array.length; i++) {
+							const element = array[i];
+							const index = i + 1;
+							let name = 'n' + index;
+							this.iconList.push({
+								id: index,
+								name: name,
+								roadName: 'element.roadName' + index,
+								type: 'icon',
+								coordinates: element,
+								lineCoordArr: [],
+								hazardType: "富水体"
+							})
+						}
+						this.loadPointData(this.iconList)
+					})
+				},
+				methods: {
+					initMap() {
+
+						const {
+							baseUrl,
+							baseMarkUrl,
+							lon,
+							lat,
+							height,
+							heading,
+							pitch,
+							roll
+						} = {
+							baseUrl: 'https://t{s}.tianditu.gov.cn/img_w/wmts?tk=b828d05ceb68f5024fb06d2d4233f07a',
+							baseMarkUrl: 'https://t{s}.tianditu.gov.cn/cia_w/wmts?tk=b828d05ceb68f5024fb06d2d4233f07a',
+							lon: 113.91679073875838,
+							lat: 22.75781345266353,
+							height: 38844,
+							heading: 10.685677919319918,
+							pitch: -89.999166515311,
+							roll: 0,
+						}
+						this.viewer = new Cesium.Viewer(document.getElementById('cesiumContainer'), {
+							shouldAnimate: true,
+							animation: false, // 是否创建动画小器件，左下角仪表
+							baseLayerPicker: false, // 是否显示图层选择器
+							fullscreenButton: false, // 是否显示全屏按钮
+							geocoder: false, // 是否显示geocoder小器件，右上角查询按钮
+							homeButton: false, // 是否显示Home按钮
+							infoBox: false, // 是否显示信息框
+							sceneModePicker: false, // 是否显示3D/2D选择器
+							selectionIndicator: false, // 是否显示选取指示器组件
+							timeline: false, // 是否显示时间轴
+							navigationHelpButton: false, // 是否显示右上角的帮助按钮
+							imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
+								url: baseUrl,
+								layer: 'img',
+								style: 'default',
+								tileMatrixSetID: 'w',
+								format: 'tiles',
+								subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'],
+								maximumLevel: 18,
+							}),
+							baseLayerPicker: false, // 关闭默认图层选择
+						})
+
+						//添加天地图中文标注层
+						this.viewer.imageryLayers.addImageryProvider(
+							new Cesium.WebMapTileServiceImageryProvider({
+								url: baseMarkUrl,
+								layer: 'cia',
+								style: 'default',
+								tileMatrixSetID: 'w',
+								format: 'tiles',
+								subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'],
+								maximumLevel: 18,
+							})
+						)
+						//添加切片
+						const tileslayer = this.viewer.imageryLayers.addImageryProvider(
+							new Cesium.UrlTemplateImageryProvider({
+								url: 'http://10.96.105.66:8888/tiles/{z}/{x}/{y}.png', // 本地服务地址
+								maximumLevel: 19, // 你的瓦片最大层级
+								minimumLevel: 0, // 最小层级
+								tilingScheme: new Cesium.WebMercatorTilingScheme(), // 一般XYZ是WebMercator
+								hasAlphaChannel: true, // 告诉Cesium图是有透明通道的
+							})
+						)
+
+						this.viewer.camera.flyTo({
+							destination: Cesium.Cartesian3.fromDegrees(lon, lat, height),
+							orientation: {
+								heading: Cesium.Math.toRadians(heading),
+								pitch: Cesium.Math.toRadians(pitch),
+								roll: Cesium.Math.toRadians(roll),
+							},
+						})
+						this.viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType
+							.LEFT_DOUBLE_CLICK);
+						this.handler = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas);
+						this.handler.setInputAction((click) => {
+							const cartesian = this.viewer.camera.pickEllipsoid(click.position, this.viewer.scene
+								.globe.ellipsoid);
+							if (cartesian) {
+								const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+								console.log(
+									`双击位置：经度 ${Cesium.Math.toDegrees(cartographic.longitude)}, 纬度 ${Cesium.Math.toDegrees(cartographic.latitude)}`
+									);
+							}
+							const cartographic = Cesium.Cartographic.fromCartesian(this.viewer.camera.position);
+							const lon = Cesium.Math.toDegrees(cartographic.longitude);
+							const lat = Cesium.Math.toDegrees(cartographic.latitude);
+							const height = cartographic.height;
+
+							const heading = Cesium.Math.toDegrees(this.viewer.camera.heading);
+							const pitch = Cesium.Math.toDegrees(this.viewer.camera.pitch);
+							const roll = Cesium.Math.toDegrees(this.viewer.camera.roll);
+
+							console.log(`地图中心：经度 ${lon}, 纬度 ${lat}, 高度 ${height}`);
+							console.log(`相机角度：heading ${heading}, pitch ${pitch}, roll ${roll}`);
+
+						}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+					},
+					loadPointData(data) {
+						const entityArr = [];
+						for (let i = 0; i < data.length; i++) {
+							const loc = data[i];
+							const entityicon = this.viewer.entities.add({
+								id: loc.id,
+								properties: loc,
+								position: Cesium.Cartesian3.fromDegrees(loc.coordinates[0], loc.coordinates[1]),
+								point: {
+									pixelSize: 10,
+									color: Cesium.Color.RED,
+									outlineColor: Cesium.Color.WHITE,
+									outlineWidth: 2,
+								},
+
+								label: {
+									text: loc.name,
+									font: '12px sans-serif',
+									style: Cesium.LabelStyle.FILL,
+									fillColor: Cesium.Color.fromCssColorString('#000000'),
+									scaleByDistance: new Cesium.NearFarScalar(10000, 1.0, 20000, 0.1),
+									pixelOffset: new Cesium.Cartesian2(0, -40), // 文字偏移，防止覆盖图标
+									pixelOffsetScaleByDistance: new Cesium.NearFarScalar(10000, 1, 20000, 0.5)
+								}
+							});
+							entityArr.push(entityicon)
+						};
+
+						// viewer.zoomTo(viewer.entities);
+						this.viewer.flyTo(this.viewer.entities, {
+							offset: {
+								heading: 6.469685569660097,
+								pitch: -88.5800817613509,
+								range: 38848
+							}
+						});
+						return entityArr;
+					}
+				}
+
+			})
+		</script>
+	</body>
+</html>
