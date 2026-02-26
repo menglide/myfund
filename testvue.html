@@ -2,25 +2,25 @@
 <html>
 
 <head>
-  <meta charset="UTF-8">
-  <title>验证VUE和element-ui</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
+    <meta charset="UTF-8">
+    <title>验证VUE和element-ui</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css">
 </head>
 
 <body>
     <div id="app">
         <div> {{ message }}</div>
         <div>
-           <el-row>
-             <el-button>默认按钮</el-button>
-             <el-button type="primary">主要按钮</el-button>
-             <el-button type="success">成功按钮</el-button>
-             <el-button type="info">信息按钮</el-button>
-             <el-button type="warning">警告按钮</el-button>
-             <el-button type="danger">危险按钮</el-button>
-           </el-row>
+            <el-row>
+                <el-button>默认按钮</el-button>
+                <el-button type="primary">主要按钮</el-button>
+                <el-button type="success">成功按钮</el-button>
+                <el-button type="info">信息按钮</el-button>
+                <el-button type="warning">警告按钮</el-button>
+                <el-button type="danger">危险按钮</el-button>
+            </el-row>
         </div>
     </div>
     <script>
@@ -29,10 +29,23 @@
             data: {
                 message: 'Hello Vue!'
             },
-            mounted(){
+            mounted() {
                 sessionStorage.setItem('vue', 'vue')
+                this.getStockInfo()
+            },
+            methods: {
+
+
+                getStockInfo() {
+                    fetch('http://1.94.224.70:10001/prod-api/captchaImage')
+                        .then(resp => {
+                            console.log(resp);
+                            
+                        })
+                },
             }
         })
     </script>
 </body>
+
 </html>
