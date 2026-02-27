@@ -120,6 +120,7 @@ export default async function handler(req, res) {
             high: formatNumber(high, fixedNumber, false),
             volume: formatNumber(params[10], 2),
             amount: '无数据',
+			      time: `${params[3]}`,
             percent: '',
             ...heldData
           };
@@ -158,6 +159,7 @@ export default async function handler(req, res) {
             high: formatNumber(high, fixedNumber, false),
             volume: formatNumber(volume, 2),
             amount: '无数据',
+			      time: `${params[12]}`,
             percent: '',
           };
           type = 'hf_';
