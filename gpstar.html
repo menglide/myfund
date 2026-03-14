@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>股票星级排名查询</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/element-ui@2/lib/index.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2/lib/theme-chalk/index.min.css"> -->
+    <script src="./assets/vue.min.js"></script>
+    <script src="./assets/element-ui@2-index.min.js"></script>
+    <link rel="stylesheet" href="./assets/element-ui@2-index.min.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <h1>股票星级排名查询</h1>
+
+            <!-- 查询条件表单 -->
+            <el-form :inline="true" :model="searchForm" class="search-form">
+                <el-form-item label="选择日期">
+                    <el-button type="default" @click="prevDay">前一天</el-button>
+                    <el-date-picker v-model="searchForm.date" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"
+                        @change="search"></el-date-picker>
+                    <el-button type="default" :disabled="isToday" @click="nextDay">后一天</el-button>
+                </el-form-item>
+                <el-form-item label="星级选择">
+                    <el-checkbox-group v-model="searchForm.selectedStars" @change="search">
+                        <el-checkbox-button v-for="star in startList" :key="star.id" :label="star.field">
+                            {{ star.name }}
+                        </el-checkbox-button>
+                    </el-checkbox-group>
+                </el-form-item>
+            </el-form>
+
+            <!-- 数据表格 -->
+            <el-table :data="stockList" style="width: 100%;">
+                <el-table-column prop="stock_name" label="股票名称" width="120"></el-table-column>
+                <el-table-column prop="stock_code" label="股票代码" width="120"></el-table-column>
+                <el-table-column prop="start_num" label="星级数量" width="200">
+                    <template scope="scope">
+                        <el-rate v-model="scope.row.start_num" disabled show-score text-color="#ff9900"
+                            score-template="{value}">
+                        </el-rate>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="price" label="当前价格" width="100">
+                    <template scope="scope"> {{ scope.row.price.toFixed(2) }}</template>
+                </el-table-column>
+                <el-table-column prop="change_rate" label="涨跌幅" width="120">
+                    <template scope="scope">
+                        <span :class="scope.row.change_rate >= 0 ? 'text-red' : 'text-green'">
+                            {{ scope.row.change_rate.toFixed(2) }}%
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="select_time" label="推送时间" width="180">
+                    <template scope="scope"> {{ formatDateTime(scope.row.select_time) }}</template>
+                </el-table-column>
+                <el-table-column prop="industry_name" label="行业" width="150"></el-table-column>
+                <el-table-column prop="block_names" label="概念板块" min-width="200" :show-overflow-tooltip="true">
+                    <template scope="scope">
+                        <el-tag v-for="(block, index) in scope.row.block_names" :key="index" size="small"
+                            class="block-tag">
+                            {{ block }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 分页组件 -->
+            <div class="pagination-container">
+                <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                    :current-page="pagination.currentPage" :page-sizes="[10, 20, 50, 100]"
+                    :page-size="pagination.pageSize" layout="total, sizes, prev, pager, next, jumper"
+                    :total="pagination.total">
+                </el-pagination>
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                stockList: [],
+                startList: [
+                    { id: 1, name: "竞价星", field: "star1" },
+                    { id: 2, name: "题材星", field: "star2" },
+                    { id: 3, name: "趋势星", field: "star3" },
+                    { id: 4, name: "波动星", field: "star4" },
+                    { id: 5, name: "情绪星", field: "star5" }
+                ],
+                searchForm: {
+                    date: new Date().toISOString().split('T')[0],
+                    selectedStars: ['star1', 'star2', 'star3', 'star4']
+                },
+                pagination: {
+                    currentPage: 1,
+                    pageSize: 10,
+                    total: 0
+                }
+            },
+            mounted() {
+                this.getStockInfo()
+            },
+            computed: {
+                isToday() {
+                    const today = new Date().toISOString().split('T')[0]
+                    return this.searchForm.date === today
+                }
+            },
+            methods: {
+                formatDateTime(timestamp) {
+                    const date = new Date(timestamp);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                },
+                getStockInfo() {
+                    const startParams = this.searchForm.selectedStars.join(',')
+                    const url = `https://prod-cms.cloudgn.com/qs_svc/v1/cms_stock_start_rank?date=${this.searchForm.date}&start=${startParams}&page_num=${this.pagination.currentPage}&page_size=${this.pagination.pageSize}`
+
+                    fetch(url)
+                        .then(resp => resp.json())
+                        .then(data => {
+                            if (data.code === 200) {
+                                this.stockList = data.result.records
+                                this.pagination.total = data.result.total
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error)
+                        })
+                },
+                search() {
+                    this.pagination.currentPage = 1
+                    this.getStockInfo()
+                },
+                prevDay() {
+                    const date = new Date(this.searchForm.date)
+                    date.setDate(date.getDate() - 1)
+                    this.searchForm.date = date.toISOString().split('T')[0]
+                    this.search()
+                },
+                nextDay() {
+                    if (!this.isToday) {
+                        const date = new Date(this.searchForm.date)
+                        date.setDate(date.getDate() + 1)
+                        this.searchForm.date = date.toISOString().split('T')[0]
+                        this.search()
+                    }
+                },
+                handleSizeChange(size) {
+                    this.pagination.pageSize = size
+                    this.getStockInfo()
+                },
+                handleCurrentChange(current) {
+                    this.pagination.currentPage = current
+                    this.getStockInfo()
+                }
+            }
+        })
+    </script>
+    <style>
+        .container {
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .el-form-item{
+            margin-bottom: 0px;
+        }
+        .search-form {
+            padding: 15px;
+            background-color: #f5f7fa;
+            border-radius: 4px;
+        }
+
+        .pagination-container {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .text-green {
+            color: #67c23a;
+        }
+
+        .text-red {
+            color: #f56c6c;
+        }
+
+        .block-tag {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</body>
+
+</html>
